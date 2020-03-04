@@ -32,22 +32,22 @@ async function login(page) {
         console.log('goto');
         await page.goto('https://web.skype.com/', {waitUntil: 'networkidle0'});
 
-        console.log('waitFor input[type="email"]');
-        await page.waitFor('input[type="email"]')
-            .then(jsHandle => jsHandle.type(login));
+        console.log('waitFor.type input[type="email"]');
+        const email = await page.waitFor('input[type="email"]');
+        await email.type(login);
 
-        console.log('waitFor input[type="submit"]');
-        await page.waitFor('input[type="submit"]')
-            .then(jsHandle => jsHandle.click());
+        console.log('waitFor.click input[type="submit"]');
+        const submitEmail = await page.waitFor('input[type="submit"]');
+        await submitEmail.click();
 
-        console.log('waitFor input[type="password"]');
+        console.log('waitFor.type input[type="password"]');
         await page.waitFor(1000);
-        await page.waitFor('input[type="password"]')
-            .then(jsHandle => jsHandle.type(password));
+        const pass = await page.waitFor('input[type="password"]');
+        await pass.type(password);
 
-        console.log('waitFor input[type="submit"]');
-        await page.waitFor('input[type="submit"]')
-            .then(jsHandle => jsHandle.click());
+        console.log('waitFor.click input[type="submit"]');
+        const passSubmut = await page.waitFor('input[type="submit"]');
+        await passSubmut.click();
 
         securityAlert(page);
 
@@ -60,8 +60,8 @@ async function login(page) {
 
 async function securityAlert(page) {
     try {
-        await page.waitFor('#iLandingViewAction', {timeout: 10000, visible: true})
-            .then(jsHandle => jsHandle.click());
+        const submitButton = await page.waitFor('#iLandingViewAction', {timeout: 10000, visible: true});
+        await submitButton.click();
     } catch(e) {
         //Ignore error
     }
