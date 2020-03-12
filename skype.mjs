@@ -5,28 +5,37 @@ const auth = process.env.SKYPE_AUTH;
 
 const WAIT_DOM_OPTIONS = {timeout: 120000, visible: true};
 
-let currentGameUrl = void(0);
+// let currentGameUrl = void(0);
+
+const state = {
+  getReadyPromise: null,
+  currentGameUrl: void(0)
+};
 
 async function start() {
-    console.log("Skype waiting game url...");
-    if (!auth)
-        throw new Error('process.env.SKYPE_AUTH required');
+    console.log("Skype background running...");
 
-    const gameEmitter = controller.getEmitter();
-    gameEmitter.on('url', onUrl);
+    if (!auth) {
+      console.warn('WARN! process.env.SKYPE_AUTH required');
+
+    } else {
+      const gameEmitter = controller.getEmitter();
+      gameEmitter.on('url', onUrl);
+      gameEmitter.on('start', getReady);
+      gameEmitter.on('stop', closePuppeteer);
+    }
 }
 
 async function onUrl(url) {
-    const isNewGameUrl = !!url && url !== currentGameUrl;
+    const isNewGameUrl = !!url && url !== state.currentGameUrl;
     if (isNewGameUrl) {
-        currentGameUrl = url;
-        console.log(`----> ${url}`);
+        state.currentGameUrl = url;
         await sendMessage(url);
     }
 }
 
 async function login(page) {
-    console.group("[login]");
+    console.group("[skype] -> [login]");
     try {
         const [login, password] = auth.split('/');
         console.log('goto');
@@ -67,21 +76,31 @@ async function securityAlert(page) {
     }
 }
 
-async function echoToGeoGuessr(page, text) {
-    console.group('[echoToGeoGuessr]');
+async function activateChat(page) {
+  console.group('[skype] -> [activateChat]');
+  try {
+    console.log('waitFor.click geoguessr');
+
+    const [textarea, isChatActivated] = await Promise.all([
+      page.waitFor('.DraftEditor-root', WAIT_DOM_OPTIONS),
+      page.waitFor(() => {
+        const chat = document.querySelector('[title^="GeoGuessr"]');
+        chat && chat.click();
+        return !!document.querySelector('.DraftEditor-root');
+      }, WAIT_DOM_OPTIONS)
+    ]);
+    console.log('✓ done');
+
+  } finally {
+    console.groupEnd();
+  }
+}
+
+async function echoToChat(page, text) {
+    console.group('[skype] -> [echoToChat]');
     try {
-        console.log('waitFor.click geoguessr');
-
-        const [textarea, isChatActivated] = await Promise.all([
-            page.waitFor('.DraftEditor-root', WAIT_DOM_OPTIONS),
-            page.waitFor(() => {
-                const chat = document.querySelector('[title^="GeoGuessr"]');
-                chat && chat.click();
-                return !!document.querySelector('.DraftEditor-root');
-             }, WAIT_DOM_OPTIONS)
-        ]);
-
         console.log('textarea.click.type');
+        const textarea = await page.waitFor('.DraftEditor-root', WAIT_DOM_OPTIONS);
         await textarea.click();
         await textarea.type(text);
 
@@ -97,31 +116,65 @@ async function echoToGeoGuessr(page, text) {
     }
 }
 
-async function sendMessage(text) {
-    console.group('[sendMesage]');
+async function getReady() {
 
-    const browser = await puppeteer.launch({
+  if (!state.getReadyPromise) {
+    state.getReadyPromise = new Promise(async (resolve, reject) => {
+      console.group('[skype] -> [getReady]');
+      const browser = await puppeteer.launch({
         headless: headless,
         args: [
-            '--no-sandbox'
+          '--no-sandbox'
         ]
-    });
+      });
+      state.browser = browser;
 
-    try {
+      try {
+
         const page = await browser.newPage();
+        page.on('close', reset);
+
         await login(page);
-        await echoToGeoGuessr(page, text);
+        await activateChat(page);
+        resolve(page);
         console.log('✓ done');
 
-        return Promise.resolve(true);
+      } catch (e) {
+        console.error(`Error: ${e.message}`);
+        browser.close();
+        reject(e);
+
+      } finally {
+        console.groupEnd();
+      }
+    });
+  }
+  return state.getReadyPromise;
+}
+
+async function sendMessage(text) {
+    console.group('[skype] -> [sendMesage]');
+
+    try {
+      const page = await getReady();
+      await echoToChat(page, text);
+      console.log('✓ done');
 
     } catch (e) {
         console.error(`Error: ${e.message}`);
     } finally {
-        browser.close();
-        console.groupEnd();
+      closePuppeteer();
+      console.groupEnd();
     }
-    return Promise.resolve(false);
+}
+
+function closePuppeteer() {
+  state.browser && state.browser.close();
+}
+
+function reset() {
+    state.getReadyPromise = null;
+    state.currentGameUrl = void(0);
 }
 
 export default {

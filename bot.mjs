@@ -23,11 +23,12 @@ export default {
       } else {
         try {
           await createAndWaitForGameEnd();
+          bot.sendMessage(chatId, 'Игра закончена.');
         } catch (e) {
           console.error(e.message);
+          bot.sendMessage(chatId, 'Что-то пошло не так. Попробуйте еще.');
         } finally {
           await gameController.stopGame();
-          bot.sendMessage(chatId, 'Игра закончена.');
         }
       }
 

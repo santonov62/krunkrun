@@ -12,12 +12,14 @@ const state = {
 
 export default {
   startGame: () => {
+    gameEmitter.emit('start');
     return host.startGame();
   },
   waitEndGame: async () => {
     return host.waitEndGame();
   },
   stopGame: () => {
+    gameEmitter.emit('stop');
     return host.stopGame();
   },
   resetState: () => {
