@@ -1,14 +1,15 @@
 import gameController from './gameController';
 import TelegramBot from 'node-telegram-bot-api';
 
-const token = process.env.KRUN_KRUN_TOKEN;
-if (!token) {
-  console.error(`ERROR! process.env.KRUN_KRUN_TOKEN required`);
-  process.exit();
-}
-
 export default {
   start: () => {
+
+    const token = process.env.KRUN_KRUN_TOKEN;
+    if (!token) {
+      console.error(`ERROR! process.env.KRUN_KRUN_TOKEN required`);
+      process.exit();
+    }
+
     const bot = new TelegramBot(token, {polling: true});
     bot.onText(/^го/i, async (message, match) => {
       const chatId = message.chat.id;

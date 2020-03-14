@@ -2,9 +2,11 @@ import bot from './bot';
 // import bot from './mocks/bot.mocks.mjs';
 import httpServer from './httpServer';
 import skype from './skype';
+import intellect from "./intellect";
 
 (async () => {
-  await httpServer.startServer();
-  await skype.start();
-  await bot.start();
+  httpServer.startServer();
+  skype.start();
+  bot.start();
+  intellect.start();
 })();

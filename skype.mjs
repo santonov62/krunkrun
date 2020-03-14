@@ -5,11 +5,11 @@ const auth = process.env.SKYPE_AUTH;
 
 const WAIT_DOM_OPTIONS = {timeout: 120000, visible: true};
 
-// let currentGameUrl = void(0);
-
 const state = {
   getReadyPromise: null,
-  currentGameUrl: void(0)
+  currentGameUrl: void(0),
+  message: [],
+  isSendingMessage: false
 };
 
 async function start() {
@@ -85,6 +85,7 @@ async function activateChat(page) {
       page.waitFor('.DraftEditor-root', WAIT_DOM_OPTIONS),
       page.waitFor(() => {
         const chat = document.querySelector('[title^="GeoGuessr"]');
+        // const chat = document.querySelector('[data-text-as-pseudo-element="Sergey Antonov"]');
         chat && chat.click();
         return !!document.querySelector('.DraftEditor-root');
       }, WAIT_DOM_OPTIONS)
@@ -102,11 +103,14 @@ async function echoToChat(page, text) {
         console.log('textarea.click.type');
         const textarea = await page.waitFor('.DraftEditor-root', WAIT_DOM_OPTIONS);
         await textarea.click();
+        await page.keyboard.down('Shift');
         await textarea.type(text);
+        await page.keyboard.up('Shift');
+        await textarea.type(`\n`);
 
-        console.log('waitFor [title="Send message"]');
-        const sendButton = await page.waitFor('[title="Send message"], [title="Отправить сообщение"]', WAIT_DOM_OPTIONS);
-        await sendButton.click();
+        // console.log('waitFor [title="Send message"]');
+        // const sendButton = await page.waitFor('[title="Send message"], [title="Отправить сообщение"]', WAIT_DOM_OPTIONS);
+        // await sendButton.click();
         console.log('✓ done');
 
         await page.waitFor(6000);
@@ -153,19 +157,25 @@ async function getReady() {
 }
 
 async function sendMessage(text) {
-    console.group('[skype] -> [sendMesage]');
+  console.group(`[skype] -> [sendMesage] ${text}`);
+  state.message.push(text);
 
-    try {
-      const page = await getReady();
-      await echoToChat(page, text);
-      console.log('✓ done');
+  if (state.isSendingMessage)
+    return;
 
-    } catch (e) {
-        console.error(`Error: ${e.message}`);
-    } finally {
-      closePuppeteer();
-      console.groupEnd();
-    }
+  try {
+    state.isSendingMessage = true;
+    const page = await getReady();
+    await echoToChat(page, state.message.join('\n'));
+    console.log('✓ done');
+
+  } catch (e) {
+    console.error(`Error: ${e.message}`);
+  } finally {
+    closePuppeteer();
+    reset();
+    console.groupEnd();
+  }
 }
 
 function closePuppeteer() {
@@ -173,8 +183,10 @@ function closePuppeteer() {
 }
 
 function reset() {
-    state.getReadyPromise = null;
-    state.currentGameUrl = void(0);
+  state.getReadyPromise = null;
+  state.currentGameUrl = void(0);
+  state.isSendingMessage = false;
+  state.message = [];
 }
 
 export default {
