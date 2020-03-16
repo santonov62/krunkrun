@@ -48,7 +48,8 @@ function start() {
 async function check() {
   if (isTimeToGame()) {
     state.lastGame = moment();
-    await gameController.startGame();
+    await skype.sendMessage(this.generateSpeech());
+    // await gameController.startGame();
   }
 }
 
