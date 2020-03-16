@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import controller from './gameController';
+import intellect from './intellect';
 const headless = !!process.env.HEADLESS;
 const auth = process.env.SKYPE_AUTH;
 
@@ -30,7 +31,8 @@ async function onUrl(url) {
     const isNewGameUrl = !!url && url !== state.currentGameUrl;
     if (isNewGameUrl) {
         state.currentGameUrl = url;
-        await sendMessage(url);
+        const text = `${url}\n${intellect.generateSpeech()}`;
+        await sendMessage(text);
     }
 }
 

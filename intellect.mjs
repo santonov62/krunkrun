@@ -42,20 +42,14 @@ function start() {
   emitter.on('start', () => state.lastGame = moment());
   emitter.on('stop', () => state.lastGame = moment());
 
-  setInterval(check, 60000);
+  setInterval(check, 60000 * 30);
 }
 
 async function check() {
   if (isTimeToGame()) {
     state.lastGame = moment();
-    const url = await gameController.startGame();
-    if (url) {
-      const text = generateSpeech();
-      await skype.sendMessage(text);
-      console.log('[isTimeToGame] ', text);
-    }
+    await gameController.startGame();
   }
-
 }
 
 function generateSpeech() {
