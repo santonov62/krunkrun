@@ -55,9 +55,9 @@ async function check() {
 
 function generateSpeech() {
   state.lastSpeak = moment();
-  const hello = randomElement(dictionary.hello);
-  const who = randomElement(dictionary.who);
-  const speech = randomElement(dictionary.speech);
+  const hello = randomArrayEl(dictionary.hello);
+  const who = randomArrayEl(dictionary.who);
+  const speech = randomArrayEl(dictionary.speech);
   const text = `${!!hello ? `${hello}, ` : ``}${who}, ${speech}`;
   const textWithUpperFirst = text.charAt(0).toUpperCase() + text.slice(1);
   return textWithUpperFirst;
@@ -67,7 +67,7 @@ function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-function randomElement (array) {
+function randomArrayEl (array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
