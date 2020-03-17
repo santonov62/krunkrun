@@ -39,17 +39,20 @@ const state = {
 
 function start() {
   const emitter = gameController.getEmitter();
-  emitter.on('start', () => state.lastGame = moment());
+  // emitter.on('start', () => state.lastGame = moment());
   emitter.on('stop', () => state.lastGame = moment());
-
-  setInterval(check, 60000 * 30);
+  setInterval(check, 60000 * 15);
 }
 
 async function check() {
-  if (isTimeToGame()) {
-    state.lastGame = moment();
-    await skype.sendMessage(generateSpeech());
-    // await gameController.startGame();
+  try {
+    if (isTimeToGame()) {
+      await skype.sendMessage(generateSpeech());
+      state.lastGame = moment();
+      // await gameController.startGame();
+    }
+  } catch(e) {
+    console.error(e.message);
   }
 }
 
