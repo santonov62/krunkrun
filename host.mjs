@@ -132,7 +132,7 @@ async function waitEndGame() {
     // console.log('#endTable ', result);
     await page.waitFor(breakTime);
     console.log('done');
-    return result;
+    return true;
 
   } finally {
     console.groupEnd();

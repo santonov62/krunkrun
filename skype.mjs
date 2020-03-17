@@ -4,7 +4,7 @@ import intellect from './intellect';
 const headless = !!process.env.HEADLESS;
 const auth = process.env.SKYPE_AUTH;
 
-const WAIT_DOM_OPTIONS = {timeout: 120000, visible: true};
+const WAIT_DOM_OPTIONS = {timeout: 180000, visible: true};
 
 const state = {
   getReadyPromise: null,
