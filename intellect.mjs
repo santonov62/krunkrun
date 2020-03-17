@@ -14,7 +14,7 @@ const dictionary = {
     "нищеброды",
     "будущие безработные"],
   speech: [
-    "все-равно подохните от короновируса! Заходи",
+    "все-равно подохните от короновируса! Рубанем?",
     "долго будете делать вид что работаете?",
     "отдыхать то тоже нужно",
     "может перерывчик?",
@@ -23,7 +23,7 @@ const dictionary = {
     "над кем сегодня будем издеваться?",
     "триста!",
     "жду вас",
-    "кто не подключится тот гей",
+    "кто не играет тот гей",
     "поиграем?",
     "Кого сегодня дрюкаем?",
     "сделал дело, можешь играть смело",
@@ -48,7 +48,7 @@ function start() {
 async function check() {
   if (isTimeToGame()) {
     state.lastGame = moment();
-    await skype.sendMessage(this.generateSpeech());
+    await skype.sendMessage(generateSpeech());
     // await gameController.startGame();
   }
 }
