@@ -54,7 +54,13 @@ async function createGame(page) {
   await page.goto('https://krunker.io/', {waitUntil: 'domcontentloaded'});
 
   console.log('wait for connecting...');
-  await page.waitFor(() => document.querySelector('#instructions').textContent.includes('CLICK TO PLAY'), {timeout: 30000});
+  await Promise.all([
+    page.waitFor('#consentWindow'),
+    page.waitFor(() => document.querySelector('#instructions').textContent.includes('CLICK TO PLAY'), {timeout: 30000})
+  ]);
+
+  console.log('Accept click');
+  await page.evaluate(() => checkTerms(1));
 
   console.log('call openHostWindow()');
   await page.evaluate(() => openHostWindow());
@@ -64,10 +70,10 @@ async function createGame(page) {
     littletown: '#menuWindow > div:nth-child(3) > label:nth-child(2) > div.hostMapName.blackShad'
   };
   console.log('wait for game options');
-  await page.waitFor(maps.littletown);
+  const mapEl = await page.waitFor(maps.littletown);
 
   console.log('select map and set game params');
-  await page.click(maps.littletown);
+  await mapEl.click();
 
   await page.evaluate(() => document.querySelector('#customSmaxPlayers').value = 10);
   await page.evaluate(gameTime => document.querySelector('#customSgameTime').value = gameTime, controller.getState().gameTime);

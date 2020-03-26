@@ -8,7 +8,7 @@ export default {
     } catch (e) {
       console.error(e.message);
     } finally {
-      await gameController.stopGame();
+      // await gameController.stopGame();
       console.log('Игра закончена.');
     }
 
