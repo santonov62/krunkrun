@@ -44,9 +44,9 @@ export default {
         }
 
         const result = await gameController.waitEndGame();
-        if (!!result) {
-          bot.sendMessage(chatId, result);
-        }
+        //if (!!result) {
+        //  bot.sendMessage(chatId, result);
+        //}
       }
     });
     return Promise.resolve();
